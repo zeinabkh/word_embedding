@@ -4,6 +4,7 @@ from gensim.corpora import Dictionary
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics import confusion_matrix,accuracy_score,f1_score
+from sklearn.decomposition import TruncatedSVD
 news_labels = {
     "ادب و هنر":0,
     "سیاسی":1,
@@ -60,13 +61,13 @@ def skip_gram(news_list):
     return skip_gram
 
 # represent  documents as vectors that are construct from the average of word vectors in each document.
-def representation_of_doc_1(c,news_list,skip_embedding):
+def representation_of_doc_1(c,news_list,word_vec):
     docs_vector = []
     for doc in news_list:
         vector = np.zeros(c)
         for word in doc["content"]:
             try:
-                vector += skip_embedding.wv[word]
+                vector += word_vec[word]
             except KeyError:
                 continue
         vector /= len(doc["content"])
@@ -75,7 +76,7 @@ def representation_of_doc_1(c,news_list,skip_embedding):
 
 
 # represent  documents as vectors that are construct from the average of word vectors in each document use TF.
-def representation_of_doc_2(c,docs,dictionary,BoW_corpus,skip_embedding):
+def representation_of_doc_2(c,docs,dictionary,BoW_corpus,word_vec):
     tfidf = TfidfModel(BoW_corpus)
     docs_vector = []
     print(len(BoW_corpus))
@@ -86,22 +87,32 @@ def representation_of_doc_2(c,docs,dictionary,BoW_corpus,skip_embedding):
         count = 0
         for word_tfidf in tf_idf_vec:
             try:
-                vector += word_tfidf[1] * skip_embedding.wv[dictionary[word_tfidf[0]]]
+                vector += word_tfidf[1] * word_vec[dictionary[word_tfidf[0]]]
                 count += word_tfidf[1]
             except KeyError:
                 continue
         docs_vector.append(vector/count)
     return docs_vector
 # load_data("Hamshahri.txt")
-
+def hamshari_doc_vec_process(path):
+    word_vec = {}
+    file_reader = open(path,encoding="utf-8")
+    data_stream = file_reader.read().split("\n")
+    for w in data_stream[1:]:
+      word = w.split(" ")
+      if len(word) > 0:
+        word_vec[word[0]] = [float(v) for v in word[1:] if len(v) > 0]
+    return word_vec
 
 def SVD_term_docs(docs,dictionary,BoW_corpus):
    doc_word_matrix = np.zeros((len(BoW_corpus),dictionary))
    for i,docs in enumerate(BoW_corpus):
        for words in docs:
            doc_word_matrix[i,words[0]] = words[1]
-   d, c, w = np.linalg.svd(doc_word_matrix)
-   print(d)
+   # d, c, w = np.linalg.svd(doc_word_matrix)
+   svd = TruncatedSVD(n_components=300)
+   print(svd.fit_transform(doc_word_matrix.transpose()))
+   # print(d)
 
 
 def kmean_clustering(doc_vectors, true_labels):
@@ -125,8 +136,14 @@ labels = list(map(lambda x: x['label'], news_list))
 dictionary = Dictionary(docs)
 BoW_corpus = [dictionary.doc2bow(text) for text in docs]
 skip_embedding = skip_gram(news_list)
-# docs_vectors_average = representation_of_doc_1(300, news_list, skip_embedding)
-# docs_vectors_tfidf = representation_of_doc_2(300, docs, dictionary, BoW_corpus, skip_embedding)
-# kmean_clustering(docs_vectors_average, labels)
-# kmean_clustering(docs_vectors_tfidf, labels)
-SVD_term_docs(docs,len(dictionary),BoW_corpus)
+docs_vectors_average = representation_of_doc_1(300, news_list, skip_embedding.wv)
+docs_vectors_tfidf = representation_of_doc_2(300, docs, dictionary, BoW_corpus, skip_embedding.wv)
+kmean_clustering(docs_vectors_average, labels)
+kmean_clustering(docs_vectors_tfidf, labels)
+# SVD_term_docs(docs,len(dictionary),BoW_corpus)
+hamshari_word_vec = hamshari_doc_vec_process("G:\master_matus\99_2\\NLP\HWS\hamshahri.fa.text.300.vec")
+docs_vectors_average1 = representation_of_doc_1(300, news_list, hamshari_word_vec)
+docs_vectors_tfidf1 = representation_of_doc_2(300, docs, dictionary, BoW_corpus, hamshari_word_vec)
+kmean_clustering(docs_vectors_average1, labels)
+kmean_clustering(docs_vectors_tfidf1, labels)
+
