@@ -13,22 +13,22 @@ news_labels = {
      "ورزش":3,
     "اجتماعی":4
 }
-import math
-news_file = open("Hamshahri.txt", encoding="utf8")
-news = news_file.read().split("\n")
-news_list = []
-stop_words = ['که', 'از', 'به', 'در', 'برای', 'زیرا', 'همچنین', 'آن', 'این', 'و', 'شد', 'شو', 'کرد', 'است', 'هست',
-              'را', 'با', 'نیست', 'ای', 'الا', 'اما', 'اگر', 'می', 'خود', 'ای', 'نیز', 'وی', 'هم', 'ما', 'نمی',
-              'پیش', 'همه', 'بی', 'من'
-    , 'چه', 'هیچ', 'ولی', 'حتی', 'توسط', 'شما', 'تو', 'او', 'ایشان', 'هنوز', 'البته', 'فقط', 'شاید', 'شان', 'روی',
-              'مانند', 'کجا', 'کی', 'چطور', 'چگونه', 'مگر', 'چندین', 'کدام', 'چیزی', 'چیز', 'دیگر', 'دیگری', 'مثل',
-              'بلی', 'همین']
-save_file = open("data.txt", 'w', encoding="utf8")
-for i, n in enumerate(news):
-    doc = []
-    for word in Tokenizer().tokenize_words(n[n.index("@") + 11]):
-        doc.append(word)
-    news_list.append({"content":doc,"label": news_labels[n[0:n.index("@")]]})
+# import math
+# news_file = open("Hamshahri.txt", encoding="utf8")
+# news = news_file.read().split("\n")
+# news_list = []
+# stop_words = ['که', 'از', 'به', 'در', 'برای', 'زیرا', 'همچنین', 'آن', 'این', 'و', 'شد', 'شو', 'کرد', 'است', 'هست',
+#               'را', 'با', 'نیست', 'ای', 'الا', 'اما', 'اگر', 'می', 'خود', 'ای', 'نیز', 'وی', 'هم', 'ما', 'نمی',
+#               'پیش', 'همه', 'بی', 'من'
+#     , 'چه', 'هیچ', 'ولی', 'حتی', 'توسط', 'شما', 'تو', 'او', 'ایشان', 'هنوز', 'البته', 'فقط', 'شاید', 'شان', 'روی',
+#               'مانند', 'کجا', 'کی', 'چطور', 'چگونه', 'مگر', 'چندین', 'کدام', 'چیزی', 'چیز', 'دیگر', 'دیگری', 'مثل',
+#               'بلی', 'همین']
+# save_file = open("data.txt", 'w', encoding="utf8")
+# for i, n in enumerate(news):
+#     doc = []
+#     for word in Tokenizer().tokenize_words(n[n.index("@") + 11]):
+#         doc.append(word)
+#     news_list.append({"content":doc,"label": news_labels[n[0:n.index("@")]]})
 
 
 
@@ -175,7 +175,7 @@ def Lda_topic_model(docs,dictionary,nb_topics,true_labels):
 
 
 
-# news_list = load_data("Hamshahri.txt")
+news_list = load_data("Hamshahri.txt")
 docs = list(map(lambda x: x['content'], news_list))
 labels = list(map(lambda x: x['label'], news_list))
 # print(docs)
